@@ -9,7 +9,12 @@ import { fileURLToPath } from "node:url";
 // randomness), so running this twice yields a byte-identical entry.png.
 const here = dirname(fileURLToPath(import.meta.url));
 const script = join(here, "build_poster.py");
-const out = join(here, "entry.png");
+// The grader mounts the repo read-only and names a writable output
+// directory in MAKEFUN_OUTPUT_DIR; build_poster.py reads the same
+// variable, so the check must look for the file in the same place.
+// Locally the variable is unset and the poster lands in the repo.
+const outDir = process.env.MAKEFUN_OUTPUT_DIR || here;
+const out = join(outDir, "entry.png");
 
 execFileSync("python3", [script], { cwd: here, stdio: "inherit" });
 
@@ -20,4 +25,4 @@ const bytes = statSync(out).size;
 if (bytes >= 1024 * 1024) {
   throw new Error(`entry.png is ${bytes} bytes, over the 1 MiB limit`);
 }
-console.log(`poster ready: entry.png (${bytes} bytes)`);
+console.log(`poster ready: ${out} (${bytes} bytes)`);
