@@ -5,7 +5,9 @@ Reads hero.png (a cartoon flat-vector Strait of Hormuz at dusk, two
 tankers) and lays out a newspaper-style front page in a bright cartoon
 look: a hero illustration band, a vivid red masthead, one full-width
 lead story, a 2x2 grid of story cards, and a sources footer.
-Writes entry.png.
+Writes entry.png to MAKEFUN_OUTPUT_DIR when that environment variable
+is set (the grader mounts the repo read-only and names a writable
+output directory there), otherwise next to this script.
 
 The build is deterministic: fixed fonts, fixed geometry, no timestamps
 and no randomness, so repeated runs produce byte-identical PNG output.
@@ -14,13 +16,19 @@ and no randomness, so repeated runs produce byte-identical PNG output.
 from __future__ import annotations
 
 import hashlib
+import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = Path(__file__).resolve().parent
 HERO_PATH = HERE / "hero.png"
-OUT_PATH = HERE / "entry.png"
+# The grader mounts the repository read-only and names a writable output
+# directory in MAKEFUN_OUTPUT_DIR; honour it when set so the poster can
+# be written there, and default to the script's own directory for local
+# runs (which still produce entry.png in the repo, exactly as before).
+_out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR")
+OUT_PATH = (Path(_out_dir) if _out_dir else HERE) / "entry.png"
 
 W, H = 1024, 1024
 
